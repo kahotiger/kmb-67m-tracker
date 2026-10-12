@@ -128,8 +128,8 @@
           <option value="ALL">📍 所有車站 (一次看全部)</option>
           <option value="YMT_PITT">油麻地 - 碧街</option>
           <option value="MK_CHANGSHA_CTB">旺角 - 長沙街</option>
-          <option value="MK_SOY_SHANTUNG">旺角 - 豉油街 / 山東街 (朗豪坊)</option>
-          <option value="MK_ARG_NELSON">旺角 - 雅蘭中心 / 奶路臣街</option>
+          <option value="MK_SOY">旺角 - 豉油街 (MK163)</option>
+          <option value="MK_ARG_NELSON">旺角 - 雅蘭中心 / 奶路臣街 (MK174)</option>
           <option value="MK_BUTE_181">旺角 - 弼街 / 始創中心</option>
           <option value="MK_ARGYLE_HEALTH">旺角街市 / 地區康健中心 (亞皆老街)</option>
         </select>
@@ -144,7 +144,7 @@
   </div>
 
   <script>
-    // 車站組合設定
+    // 依實測站點修正，移除 63X 不停靠的 MK166 山東街
     const TARGET_STOPS = [
       {
         key: 'YMT_PITT',
@@ -159,9 +159,9 @@
         ctbIds: ['001551']
       },
       {
-        key: 'MK_SOY_SHANTUNG',
-        name: '旺角 - 豉油街 / 山東街 (朗豪坊)',
-        kmbIds: ['4A1CFF0BEA83DE78', '38F0C9768AA2AF93'],
+        key: 'MK_SOY',
+        name: '旺角 - 豉油街 (MK163)',
+        kmbIds: ['4A1CFF0BEA83DE78'],
         ctbIds: []
       },
       {
@@ -184,14 +184,12 @@
       }
     ];
 
-    // 目標路線 (包含日間及通宵 N50, N241, N260, N269)
     const ALL_ROUTES = [
       '50', '63X', '30X', '238X',
       '52X', '58X', '59X', '60X', '67X', '68X', '69X',
       'N241', 'N260', 'N269', 'N50'
     ];
 
-    // 城巴（CTB）專屬 ETA 查詢
     async function fetchCtbStopEta(ctbStopId) {
       if (!ctbStopId) return [];
       
@@ -220,7 +218,6 @@
         } catch (e) {}
       }
 
-      // 針對城巴 50 及 N50 的單線精確備用查詢
       const singleRoutes = ['50', 'N50'];
       let fallbackList = [];
       for (const r of singleRoutes) {
@@ -242,7 +239,6 @@
       return fallbackList;
     }
 
-    // 九巴（KMB）專屬 ETA 查詢
     async function fetchKmbStopEta(kmbStopId) {
       if (!kmbStopId) return [];
       try {
