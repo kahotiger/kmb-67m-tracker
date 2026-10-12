@@ -126,10 +126,11 @@
       <div class="select-container">
         <select id="stopSelector" class="stop-select" onchange="loadAllEta()">
           <option value="ALL">📍 所有車站 (一次看全部)</option>
-          <option value="YMT_PITT">油麻地 - 碧街 (YT144/YT145)</option>
-          <option value="MK_CHANGSHA">旺角 - 長沙街 (彌敦道)</option>
-          <option value="MK_SOY_SHANTUNG">旺角 - 豉油街 / 山東街 / 雅蘭中心</option>
-          <option value="MK_NELSON_BUTE">旺角 - 奶路臣街 / 弼街 (始創中心)</option>
+          <option value="YMT_PITT">油麻地 - 碧街</option>
+          <option value="MK_CHANGSHA_CTB">旺角 - 長沙街</option>
+          <option value="MK_SOY_SHANTUNG">旺角 - 豉油街 / 山東街 (朗豪坊)</option>
+          <option value="MK_ARG_NELSON">旺角 - 雅蘭中心 / 奶路臣街</option>
+          <option value="MK_BUTE_181">旺角 - 弼街 / 始創中心</option>
           <option value="MK_ARGYLE_HEALTH">旺角街市 / 地區康健中心 (亞皆老街)</option>
         </select>
       </div>
@@ -143,7 +144,7 @@
   </div>
 
   <script>
-    // 車站獨立拆分列表
+    // 車站組合設定
     const TARGET_STOPS = [
       {
         key: 'YMT_PITT',
@@ -152,7 +153,7 @@
         ctbIds: ['001549']
       },
       {
-        key: 'MK_CHANGSHA',
+        key: 'MK_CHANGSHA_CTB',
         name: '旺角 - 長沙街',
         kmbIds: [],
         ctbIds: ['001551']
@@ -161,12 +162,18 @@
         key: 'MK_SOY_SHANTUNG',
         name: '旺角 - 豉油街 / 山東街 (朗豪坊)',
         kmbIds: ['4A1CFF0BEA83DE78', '38F0C9768AA2AF93'],
+        ctbIds: []
+      },
+      {
+        key: 'MK_ARG_NELSON',
+        name: '旺角 - 雅蘭中心 / 奶路臣街',
+        kmbIds: ['221A18C37331E6FD'],
         ctbIds: ['001553']
       },
       {
-        key: 'MK_NELSON_BUTE',
-        name: '旺角 - 奶路臣街 / 弼街 (始創中心)',
-        kmbIds: ['221A18C37331E6FD', '30FEA8A7071EDE48'],
+        key: 'MK_BUTE_181',
+        name: '旺角 - 弼街 / 始創中心',
+        kmbIds: ['30FEA8A7071EDE48'],
         ctbIds: []
       },
       {
@@ -177,43 +184,55 @@
       }
     ];
 
-    // 精確白名單路線
+    // 目標路線
     const ALL_ROUTES = [
       '50', '63X', '30X', '238X',
       '52X', '58X', '59X', '60X', '67X', '68X', '69X',
       'N241', 'N260', 'N269', 'N50'
     ];
 
-    // 優化城巴（CTB）專屬 ETA 查詢：整站一次過 Fetch
+    // 城巴（CTB）專屬 ETA 查詢 (加強 API 相容度)
     async function fetchCtbStopEta(ctbStopId) {
       if (!ctbStopId) return [];
       try {
         const res = await fetch(`https://rt.data.gov.hk/v2/transport/citybus/eta/CTB/${ctbStopId}`);
         if (!res.ok) return [];
-        const data = await res.json();
-        return (data.data || []).filter(i => i.eta && ALL_ROUTES.includes(i.route)).map(i => ({
-          ...i,
-          co: 'CTB',
-          dest_tc: i.dest_tc
-        }));
+        const json = await res.json();
+        const list = json.data || [];
+        
+        return list
+          .filter(i => i.eta && ALL_ROUTES.includes(i.route))
+          .map(i => ({
+            route: i.route,
+            eta: i.eta,
+            dest_tc: i.dest_tc || i.dest_en || '目的地',
+            co: 'CTB'
+          }));
       } catch (err) {
+        console.error('CTB fetch error:', err);
         return [];
       }
     }
 
-    // 九巴（KMB）專屬 ETA 查詢：整站一次過 Fetch
+    // 九巴（KMB）專屬 ETA 查詢
     async function fetchKmbStopEta(kmbStopId) {
       if (!kmbStopId) return [];
       try {
         const res = await fetch(`https://data.etabus.gov.hk/v1/transport/kmb/stop-eta/${kmbStopId}`);
         if (!res.ok) return [];
-        const data = await res.json();
-        return (data.data || []).filter(i => i.eta && ALL_ROUTES.includes(i.route)).map(i => ({
-          ...i,
-          co: 'KMB',
-          dest_tc: i.dest_tc || '目的地'
-        }));
+        const json = await res.json();
+        const list = json.data || [];
+
+        return list
+          .filter(i => i.eta && ALL_ROUTES.includes(i.route))
+          .map(i => ({
+            route: i.route,
+            eta: i.eta,
+            dest_tc: i.dest_tc || '目的地',
+            co: 'KMB'
+          }));
       } catch (err) {
+        console.error('KMB fetch error:', err);
         return [];
       }
     }
@@ -221,14 +240,11 @@
     async function fetchStopAllRoutes(stopObj) {
       const promises = [];
 
-      // 1. 城巴單一站點高效查詢
       if (stopObj.ctbIds && stopObj.ctbIds.length > 0) {
         stopObj.ctbIds.forEach(cId => {
           promises.push(fetchCtbStopEta(cId));
         });
       }
-
-      // 2. 九巴單一站點高效查詢
       if (stopObj.kmbIds && stopObj.kmbIds.length > 0) {
         stopObj.kmbIds.forEach(kId => {
           promises.push(fetchKmbStopEta(kId));
@@ -289,15 +305,19 @@
               const bus1 = uniqueList[0];
               const bus2 = uniqueList[1];
 
-              const diff1 = Math.max(0, Math.round((new Date(bus1.eta) - now) / 60000));
-              const timeStr1 = new Date(bus1.eta).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+              const date1 = new Date(bus1.eta);
+              const diff1 = isNaN(date1.getTime()) ? 0 : Math.max(0, Math.round((date1 - now) / 60000));
+              const timeStr1 = isNaN(date1.getTime()) ? '--:--' : date1.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
               let primaryStr = diff1 === 0 ? '即將到站' : `${diff1} 分鐘 <span style="font-size:11px;font-weight:normal;">(${timeStr1})</span>`;
               let secondEtaStr = '暫無次班';
               if (bus2 && bus2.eta) {
-                const diff2 = Math.max(0, Math.round((new Date(bus2.eta) - now) / 60000));
-                const timeStr2 = new Date(bus2.eta).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                secondEtaStr = `次班: ${timeStr2} (${diff2}分)`;
+                const date2 = new Date(bus2.eta);
+                if (!isNaN(date2.getTime())) {
+                  const diff2 = Math.max(0, Math.round((date2 - now) / 60000));
+                  const timeStr2 = date2.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                  secondEtaStr = `次班: ${timeStr2} (${diff2}分)`;
+                }
               }
 
               let companyClass = bus1.co === 'CTB' ? 'ctb' : 'kmb';
