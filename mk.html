@@ -148,21 +148,192 @@
       {
         key: 'YMT_PITT',
         name: '油麻地 - 碧街',
-        kmbIds: ['FC46B100B69573B7', '1E0C8A961881DE1D'], // YT145, YT144
-        ctbIds: ['001549']                                 // 碧街, 彌敦道
+        kmbIds: ['FC46B100B69573B7', '1E0C8A961881DE1D'],
+        ctbIds: ['001549']
       },
       {
         key: 'MK_CHANGSHA',
         name: '旺角 - 長沙街',
         kmbIds: [],
-        ctbIds: ['001551']                                 // 長沙街, 彌敦道 (城巴 50 等停靠)
+        ctbIds: ['001551']
       },
       {
         key: 'MK_SOY_SHANTUNG',
         name: '旺角 - 豉油街 / 山東街 (朗豪坊)',
-        kmbIds: ['4A1CFF0BEA83DE78', '38F0C9768AA2AF93'], // MK163, MK166
-        ctbIds: ['001553']                                 // 雅蘭中心
+        kmbIds: ['4A1CFF0BEA83DE78', '38F0C9768AA2AF93'],
+        ctbIds: ['001553']
       },
       {
         key: 'MK_NELSON_BUTE',
-        
+        name: '旺角 - 奶路臣街 / 弼街 (始創中心)',
+        kmbIds: ['221A18C37331E6FD', '30FEA8A7071EDE48'],
+        ctbIds: []
+      },
+      {
+        key: 'MK_ARGYLE_HEALTH',
+        name: '旺角街市 / 地區康健中心 (亞皆老街)',
+        kmbIds: ['7ADC6D521E6BECE6'],
+        ctbIds: ['001396']
+      }
+    ];
+
+    // 精確白名單路線
+    const ALL_ROUTES = [
+      '50', '63X', '30X', '238X',
+      '52X', '58X', '59X', '60X', '67X', '68X', '69X',
+      'N241', 'N260', 'N269', 'N50'
+    ];
+
+    // 優化城巴（CTB）專屬 ETA 查詢：整站一次過 Fetch
+    async function fetchCtbStopEta(ctbStopId) {
+      if (!ctbStopId) return [];
+      try {
+        const res = await fetch(`https://rt.data.gov.hk/v2/transport/citybus/eta/CTB/${ctbStopId}`);
+        if (!res.ok) return [];
+        const data = await res.json();
+        return (data.data || []).filter(i => i.eta && ALL_ROUTES.includes(i.route)).map(i => ({
+          ...i,
+          co: 'CTB',
+          dest_tc: i.dest_tc
+        }));
+      } catch (err) {
+        return [];
+      }
+    }
+
+    // 九巴（KMB）專屬 ETA 查詢：整站一次過 Fetch
+    async function fetchKmbStopEta(kmbStopId) {
+      if (!kmbStopId) return [];
+      try {
+        const res = await fetch(`https://data.etabus.gov.hk/v1/transport/kmb/stop-eta/${kmbStopId}`);
+        if (!res.ok) return [];
+        const data = await res.json();
+        return (data.data || []).filter(i => i.eta && ALL_ROUTES.includes(i.route)).map(i => ({
+          ...i,
+          co: 'KMB',
+          dest_tc: i.dest_tc || '目的地'
+        }));
+      } catch (err) {
+        return [];
+      }
+    }
+
+    async function fetchStopAllRoutes(stopObj) {
+      const promises = [];
+
+      // 1. 城巴單一站點高效查詢
+      if (stopObj.ctbIds && stopObj.ctbIds.length > 0) {
+        stopObj.ctbIds.forEach(cId => {
+          promises.push(fetchCtbStopEta(cId));
+        });
+      }
+
+      // 2. 九巴單一站點高效查詢
+      if (stopObj.kmbIds && stopObj.kmbIds.length > 0) {
+        stopObj.kmbIds.forEach(kId => {
+          promises.push(fetchKmbStopEta(kId));
+        });
+      }
+
+      const results = await Promise.all(promises);
+      let combined = [];
+      results.forEach(list => { combined = combined.concat(list); });
+
+      return combined;
+    }
+
+    async function loadAllEta() {
+      const container = document.getElementById('etaContainer');
+      const selectedKey = document.getElementById('stopSelector').value;
+      const now = new Date();
+
+      try {
+        const filteredStops = selectedKey === 'ALL' 
+          ? TARGET_STOPS 
+          : TARGET_STOPS.filter(s => s.key === selectedKey);
+
+        const promises = filteredStops.map(stopObj => fetchStopAllRoutes(stopObj));
+        const results = await Promise.all(promises);
+
+        let html = '';
+
+        filteredStops.forEach((stop, index) => {
+          let rawList = results[index] || [];
+
+          html += `<div class="stop-group-title">${stop.name}</div>`;
+
+          if (rawList.length > 0) {
+            const routeMap = {};
+            rawList.forEach(item => {
+              if (!routeMap[item.route]) routeMap[item.route] = [];
+              routeMap[item.route].push(item);
+            });
+
+            const routes = Object.keys(routeMap).sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+
+            routes.forEach(routeName => {
+              let matched = routeMap[routeName];
+
+              const uniqueList = [];
+              const seenTimes = new Set();
+              matched.forEach(item => {
+                const key = `${item.route}_${item.eta}_${item.dest_tc}`;
+                if (!seenTimes.has(key)) {
+                  seenTimes.add(key);
+                  uniqueList.push(item);
+                }
+              });
+
+              uniqueList.sort((a, b) => new Date(a.eta) - new Date(b.eta));
+
+              const bus1 = uniqueList[0];
+              const bus2 = uniqueList[1];
+
+              const diff1 = Math.max(0, Math.round((new Date(bus1.eta) - now) / 60000));
+              const timeStr1 = new Date(bus1.eta).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+              let primaryStr = diff1 === 0 ? '即將到站' : `${diff1} 分鐘 <span style="font-size:11px;font-weight:normal;">(${timeStr1})</span>`;
+              let secondEtaStr = '暫無次班';
+              if (bus2 && bus2.eta) {
+                const diff2 = Math.max(0, Math.round((new Date(bus2.eta) - now) / 60000));
+                const timeStr2 = new Date(bus2.eta).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                secondEtaStr = `次班: ${timeStr2} (${diff2}分)`;
+              }
+
+              let companyClass = bus1.co === 'CTB' ? 'ctb' : 'kmb';
+              let tagText = bus1.co === 'CTB' ? '城巴' : '九巴';
+              let tagClass = bus1.co === 'CTB' ? 'ctb-tag' : 'kmb-tag';
+
+              html += `
+                <div class="route-item ${companyClass}">
+                  <div class="route-badge">
+                    <span class="route-number">${routeName}</span>
+                    <span class="company-tag ${tagClass}">${tagText}</span>
+                  </div>
+                  <div class="route-info">
+                    <div class="dest-name">往 ${bus1.dest_tc || '目的地'}</div>
+                  </div>
+                  <div class="eta-times">
+                    <div class="primary-eta">${primaryStr}</div>
+                    <div class="secondary-eta">${secondEtaStr}</div>
+                  </div>
+                </div>
+              `;
+            });
+          } else {
+            html += `<div class="status-msg" style="padding: 12px; font-size: 13px;">暫無即時班次資料</div>`;
+          }
+        });
+
+        container.innerHTML = html;
+      } catch (err) {
+        console.error(err);
+        container.innerHTML = `<div class="status-msg">載入失敗，請稍後重試</div>`;
+      }
+    }
+
+    loadAllEta();
+    setInterval(loadAllEta, 15000);
+  </script>
+</body>
+</html>
