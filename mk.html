@@ -126,10 +126,10 @@
       <div class="select-container">
         <select id="stopSelector" class="stop-select" onchange="loadAllEta()">
           <option value="ALL">📍 所有車站 (一次看全部)</option>
-          <option value="YMT_PITT">油麻地 - 碧街</option>
+          <option value="YMT_PITT">油麻地 - 碧街 (YT144/YT145)</option>
           <option value="MK_CHANGSHA_CTB">旺角 - 長沙街</option>
-          <option value="MK_SOY">旺角 - 豉油街 (MK163)</option>
-          <option value="MK_ARG_NELSON">旺角 - 雅蘭中心 / 奶路臣街 (MK174)</option>
+          <option value="MK_SOY_SHANTUNG">旺角 - 豉油街 / 山東街 (朗豪坊)</option>
+          <option value="MK_ARG_NELSON">旺角 - 雅蘭中心 / 奶路臣街</option>
           <option value="MK_BUTE_181">旺角 - 弼街 / 始創中心</option>
           <option value="MK_ARGYLE_HEALTH">旺角街市 / 地區康健中心 (亞皆老街)</option>
         </select>
@@ -144,12 +144,12 @@
   </div>
 
   <script>
-    // 依實測站點修正，移除 63X 不停靠的 MK166 山東街
+    // 依實測結果補全 ID：加入 30X 專屬之 YT144 (碧街) 與 MK166 (山東街)
     const TARGET_STOPS = [
       {
         key: 'YMT_PITT',
         name: '油麻地 - 碧街',
-        kmbIds: ['FC46B100B69573B7', '1E0C8A961881DE1D'],
+        kmbIds: ['FC46B100B69573B7', '1E0C8A961881DE1D'], // YT145, YT144 (30X)
         ctbIds: ['001549']
       },
       {
@@ -159,27 +159,27 @@
         ctbIds: ['001551']
       },
       {
-        key: 'MK_SOY',
-        name: '旺角 - 豉油街 (MK163)',
-        kmbIds: ['4A1CFF0BEA83DE78'],
+        key: 'MK_SOY_SHANTUNG',
+        name: '旺角 - 豉油街 / 山東街 (朗豪坊)',
+        kmbIds: ['4A1CFF0BEA83DE78', '38F0C9768AA2AF93'], // MK163 (鼓油街), MK166 (山東街/30X)
         ctbIds: []
       },
       {
         key: 'MK_ARG_NELSON',
         name: '旺角 - 雅蘭中心 / 奶路臣街',
-        kmbIds: ['221A18C37331E6FD'],
-        ctbIds: ['001553']
+        kmbIds: ['221A18C37331E6FD'],                      // MK174 奶路臣街
+        ctbIds: ['001553']                                 // 雅蘭中心 城巴 001553
       },
       {
         key: 'MK_BUTE_181',
         name: '旺角 - 弼街 / 始創中心',
-        kmbIds: ['30FEA8A7071EDE48'],
+        kmbIds: ['30FEA8A7071EDE48'],                      // MK181 (30X, 238X 等)
         ctbIds: []
       },
       {
         key: 'MK_ARGYLE_HEALTH',
         name: '旺角街市 / 地區康健中心 (亞皆老街)',
-        kmbIds: ['7ADC6D521E6BECE6'],
+        kmbIds: ['7ADC6D521E6BECE6'],                      // MK626
         ctbIds: ['001396']
       }
     ];
