@@ -184,34 +184,62 @@
       }
     ];
 
-    // 目標路線
+    // 目標路線 (包含日間及通宵 N50, N241, N260, N269)
     const ALL_ROUTES = [
       '50', '63X', '30X', '238X',
       '52X', '58X', '59X', '60X', '67X', '68X', '69X',
       'N241', 'N260', 'N269', 'N50'
     ];
 
-    // 城巴（CTB）專屬 ETA 查詢 (加強 API 相容度)
+    // 城巴（CTB）專屬 ETA 查詢
     async function fetchCtbStopEta(ctbStopId) {
       if (!ctbStopId) return [];
-      try {
-        const res = await fetch(`https://rt.data.gov.hk/v2/transport/citybus/eta/CTB/${ctbStopId}`);
-        if (!res.ok) return [];
-        const json = await res.json();
-        const list = json.data || [];
-        
-        return list
-          .filter(i => i.eta && ALL_ROUTES.includes(i.route))
-          .map(i => ({
-            route: i.route,
-            eta: i.eta,
-            dest_tc: i.dest_tc || i.dest_en || '目的地',
-            co: 'CTB'
-          }));
-      } catch (err) {
-        console.error('CTB fetch error:', err);
-        return [];
+      
+      const apiUrls = [
+        `https://rt.data.gov.hk/v2/transport/citybus/eta/ctb/${ctbStopId}`,
+        `https://rt.data.gov.hk/v2/transport/citybus/eta/CTB/${ctbStopId}`
+      ];
+
+      for (const url of apiUrls) {
+        try {
+          const res = await fetch(url);
+          if (res.ok) {
+            const json = await res.json();
+            const list = json.data || [];
+            if (list.length > 0) {
+              return list
+                .filter(i => i.eta && ALL_ROUTES.includes(i.route))
+                .map(i => ({
+                  route: i.route,
+                  eta: i.eta,
+                  dest_tc: i.dest_tc || i.dest_en || '目的地',
+                  co: 'CTB'
+                }));
+            }
+          }
+        } catch (e) {}
       }
+
+      // 針對城巴 50 及 N50 的單線精確備用查詢
+      const singleRoutes = ['50', 'N50'];
+      let fallbackList = [];
+      for (const r of singleRoutes) {
+        try {
+          const res = await fetch(`https://rt.data.gov.hk/v2/transport/citybus/eta/CTB/${ctbStopId}/${r}`);
+          if (res.ok) {
+            const json = await res.json();
+            const items = (json.data || []).filter(i => i.eta).map(i => ({
+              route: r,
+              eta: i.eta,
+              dest_tc: i.dest_tc || '屯門 (菁田邨)',
+              co: 'CTB'
+            }));
+            fallbackList = fallbackList.concat(items);
+          }
+        } catch (e) {}
+      }
+
+      return fallbackList;
     }
 
     // 九巴（KMB）專屬 ETA 查詢
@@ -232,7 +260,6 @@
             co: 'KMB'
           }));
       } catch (err) {
-        console.error('KMB fetch error:', err);
         return [];
       }
     }
