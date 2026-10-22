@@ -126,7 +126,6 @@
       <div class="select-container">
         <select id="stopSelector" class="stop-select" onchange="loadAllEta()">
           <option value="ALL">📍 所有車站 (一次看全部)</option>
-          <option value="YMT_PITT">油麻地 - 碧街 (YT144/YT145)</option>
           <option value="MK_CHANGSHA_CTB">旺角 - 長沙街</option>
           <option value="MK_SOY_SHANTUNG">旺角 - 豉油街 / 山東街 (朗豪坊)</option>
           <option value="MK_ARG_NELSON">旺角 - 雅蘭中心 / 奶路臣街</option>
@@ -146,12 +145,6 @@
   <script>
     // 依實測結果補全 ID：加入 30X 專屬之 YT144 (碧街) 與 MK166 (山東街)
     const TARGET_STOPS = [
-      {
-        key: 'YMT_PITT',
-        name: '油麻地 - 碧街',
-        kmbIds: ['FC46B100B69573B7', '1E0C8A961881DE1D'], // YT145, YT144 (30X)
-        ctbIds: ['001549']
-      },
       {
         key: 'MK_CHANGSHA_CTB',
         name: '旺角 - 長沙街',
