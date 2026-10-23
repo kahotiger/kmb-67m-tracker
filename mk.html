@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>旺角/油麻地 巴士到站時間表</title>
+  <title>旺角 巴士到站時間表</title>
 
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -136,13 +136,12 @@
   <div class="card">
     <div class="header">
       <button class="update-btn-icon" onclick="loadAllEta()" title="更新班次">🔄</button>
-      <h1>🛍️ 旺角 / 油麻地 巴士到站時間</h1>
-      <p>📍 選擇彌敦道 / 亞皆老街車站觀測往新界西路線</p>
+      <h1>🛍️ 旺角 巴士到站時間</h1>
+      <p>📍 選擇彌敦道 / 亞皆老街車站往荃灣/新界西路線</p>
 
       <div class="select-container">
         <select id="stopSelector" class="stop-select" onchange="loadAllEta()">
           <option value="ALL">📍 所有車站 (一次看全部)</option>
-          <option value="YMT_PITT">油麻地 - 碧街 (YT144/YT145)</option>
           <option value="MK_CHANGSHA_CTB">旺角 - 長沙街</option>
           <option value="MK_SOY_SHANTUNG">旺角 - 豉油街 / 山東街 (朗豪坊)</option>
           <option value="MK_ARG_NELSON">旺角 - 雅蘭中心 / 奶路臣街</option>
@@ -159,12 +158,7 @@
 
   <script>
     const TARGET_STOPS = [
-      {
-        key: 'YMT_PITT',
-        name: '油麻地 - 碧街',
-        kmbIds: ['FC46B100B69573B7', '1E0C8A961881DE1D'], // YT145, YT144 (30X)
-        ctbIds: ['001549']
-      },
+   
       {
         key: 'MK_CHANGSHA_CTB',
         name: '旺角 - 長沙街',
