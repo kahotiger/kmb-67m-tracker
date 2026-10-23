@@ -11,7 +11,7 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       background-color: #f4f6f9;
       color: #333;
-      padding: 16px;
+      padding: 10px 8px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -22,23 +22,24 @@
       background: white;
       width: 100%;
       max-width: 480px;
-      border-radius: 16px;
+      border-radius: 14px;
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
       border: 1px solid #e0e6ed;
       overflow: hidden;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
     .header {
       background: #c62828;
       color: white;
-      padding: 20px;
+      padding: 14px 16px;
+      position: relative;
       text-align: center;
     }
-    .header h1 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
-    .header p { font-size: 12px; opacity: 0.85; }
+    .header h1 { font-size: 16px; font-weight: 700; margin-bottom: 2px; }
+    .header p { font-size: 11px; opacity: 0.85; }
     
     .select-container {
-      margin-top: 14px;
+      margin-top: 10px;
       display: flex;
       justify-content: center;
     }
@@ -46,45 +47,54 @@
       background: white;
       color: #c62828;
       border: 1px solid #cbd5e0;
-      padding: 8px 12px;
-      border-radius: 20px;
-      font-size: 13px;
+      padding: 5px 10px;
+      border-radius: 16px;
+      font-size: 12px;
       font-weight: bold;
       outline: none;
       cursor: pointer;
-      width: 90%;
-      max-width: 340px;
+      width: 95%;
+      max-width: 320px;
       text-align: center;
     }
 
-    .update-btn {
-      background: rgba(255, 255, 255, 0.15);
-      border: 1px solid rgba(255, 255, 255, 0.4);
+    .update-btn-icon {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.5);
       color: white;
-      padding: 6px 16px;
-      border-radius: 20px;
-      font-size: 12px;
-      margin-top: 10px;
-      cursor: pointer;
-    }
-    .eta-list { padding: 16px; }
-    .stop-group-title {
-      font-size: 14px;
-      font-weight: bold;
-      color: #c62828;
-      margin: 16px 0 10px 4px;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
       display: flex;
       align-items: center;
-      border-bottom: 2px solid #e2e8f0;
-      padding-bottom: 6px;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+    .update-btn-icon:active { background: rgba(255, 255, 255, 0.4); }
+
+    .eta-list { padding: 10px 12px; }
+    .stop-group-title {
+      font-size: 12px;
+      font-weight: bold;
+      color: #c62828;
+      margin: 10px 0 6px 2px;
+      display: flex;
+      align-items: center;
+      border-bottom: 1.5px solid #e2e8f0;
+      padding-bottom: 4px;
     }
     .stop-group-title::before {
       content: "";
       display: inline-block;
-      width: 4px;
-      height: 14px;
+      width: 3px;
+      height: 12px;
       background: #e60012;
-      margin-right: 8px;
+      margin-right: 6px;
       border-radius: 2px;
     }
     .route-item {
@@ -92,40 +102,47 @@
       align-items: center;
       justify-content: space-between;
       background: #fff5f5;
-      border: 1.5px solid #ff5252;
-      border-radius: 12px;
-      padding: 12px 16px;
-      margin-bottom: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+      border: 1px solid #ff8a8a;
+      border-radius: 8px;
+      padding: 8px 10px;
+      margin-bottom: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
     }
     .route-item.ctb {
       background: #fffdf0;
-      border-color: #ffd100;
+      border-color: #ffe066;
     }
-    .route-badge { display: flex; flex-direction: column; align-items: flex-start; min-width: 65px; }
-    .route-number { font-size: 20px; font-weight: 800; color: #1a365d; }
-    .company-tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-top: 2px; }
+    .route-badge { 
+      display: flex; 
+      align-items: center; 
+      gap: 5px; 
+      min-width: 90px; 
+    }
+    .route-number { font-size: 16px; font-weight: 800; color: #1a365d; }
+    .company-tag { font-size: 9px; padding: 1px 5px; border-radius: 3px; font-weight: bold; }
     .ctb-tag { background-color: #ffd100; color: #333; }
     .kmb-tag { background-color: #e60012; color: white; }
     
-    .route-info { flex: 1; padding: 0 12px; }
-    .dest-name { font-size: 14px; font-weight: bold; color: #2d3748; }
-    .eta-times { text-align: right; min-width: 125px; }
-    .primary-eta { font-size: 15px; font-weight: bold; color: #c62828; }
-    .secondary-eta { font-size: 11px; color: #718096; margin-top: 3px; }
-    .status-msg { text-align: center; padding: 24px; color: #718096; font-size: 14px; }
+    .route-info { flex: 1; padding: 0 8px; }
+    .dest-name { font-size: 12px; font-weight: 700; color: #2d3748; }
+    .eta-times { text-align: right; min-width: 105px; }
+    .primary-eta { font-size: 13px; font-weight: bold; color: #c62828; }
+    .secondary-eta { font-size: 10px; color: #718096; margin-top: 1px; }
+    .status-msg { text-align: center; padding: 16px; color: #718096; font-size: 12px; }
   </style>
 </head>
 <body>
 
   <div class="card">
     <div class="header">
+      <button class="update-btn-icon" onclick="loadAllEta()" title="更新班次">🔄</button>
       <h1>🛍️ 旺角 / 油麻地 巴士到站時間</h1>
       <p>📍 選擇彌敦道 / 亞皆老街車站觀測往新界西路線</p>
 
       <div class="select-container">
         <select id="stopSelector" class="stop-select" onchange="loadAllEta()">
           <option value="ALL">📍 所有車站 (一次看全部)</option>
+          <option value="YMT_PITT">油麻地 - 碧街 (YT144/YT145)</option>
           <option value="MK_CHANGSHA_CTB">旺角 - 長沙街</option>
           <option value="MK_SOY_SHANTUNG">旺角 - 豉油街 / 山東街 (朗豪坊)</option>
           <option value="MK_ARG_NELSON">旺角 - 雅蘭中心 / 奶路臣街</option>
@@ -133,8 +150,6 @@
           <option value="MK_ARGYLE_HEALTH">旺角街市 / 地區康健中心 (亞皆老街)</option>
         </select>
       </div>
-
-      <button class="update-btn" onclick="loadAllEta()">🔄 更新到站時間</button>
     </div>
 
     <div class="eta-list" id="etaContainer">
@@ -143,8 +158,13 @@
   </div>
 
   <script>
-    // 依實測結果補全 ID：加入 30X 專屬之 YT144 (碧街) 與 MK166 (山東街)
     const TARGET_STOPS = [
+      {
+        key: 'YMT_PITT',
+        name: '油麻地 - 碧街',
+        kmbIds: ['FC46B100B69573B7', '1E0C8A961881DE1D'], // YT145, YT144 (30X)
+        ctbIds: ['001549']
+      },
       {
         key: 'MK_CHANGSHA_CTB',
         name: '旺角 - 長沙街',
@@ -154,7 +174,7 @@
       {
         key: 'MK_SOY_SHANTUNG',
         name: '旺角 - 豉油街 / 山東街 (朗豪坊)',
-        kmbIds: ['4A1CFF0BEA83DE78', '38F0C9768AA2AF93'], // MK163 (鼓油街), MK166 (山東街/30X)
+        kmbIds: ['4A1CFF0BEA83DE78', '38F0C9768AA2AF93', '8552E415E0C7B113'], // MK163, MK166, MK165 (238X)
         ctbIds: []
       },
       {
@@ -166,7 +186,7 @@
       {
         key: 'MK_BUTE_181',
         name: '旺角 - 弼街 / 始創中心',
-        kmbIds: ['30FEA8A7071EDE48'],                      // MK181 (30X, 238X 等)
+        kmbIds: ['30FEA8A7071EDE48'],                      // MK181
         ctbIds: []
       },
       {
@@ -325,7 +345,7 @@
               const diff1 = isNaN(date1.getTime()) ? 0 : Math.max(0, Math.round((date1 - now) / 60000));
               const timeStr1 = isNaN(date1.getTime()) ? '--:--' : date1.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-              let primaryStr = diff1 === 0 ? '即將到站' : `${diff1} 分鐘 <span style="font-size:11px;font-weight:normal;">(${timeStr1})</span>`;
+              let primaryStr = diff1 === 0 ? '即將到站' : `${diff1} 分鐘 <span style="font-size:10px;font-weight:normal;">(${timeStr1})</span>`;
               let secondEtaStr = '暫無次班';
               if (bus2 && bus2.eta) {
                 const date2 = new Date(bus2.eta);
@@ -343,8 +363,8 @@
               html += `
                 <div class="route-item ${companyClass}">
                   <div class="route-badge">
-                    <span class="route-number">${routeName}</span>
                     <span class="company-tag ${tagClass}">${tagText}</span>
+                    <span class="route-number">${routeName}</span>
                   </div>
                   <div class="route-info">
                     <div class="dest-name">往 ${bus1.dest_tc || '目的地'}</div>
@@ -357,7 +377,7 @@
               `;
             });
           } else {
-            html += `<div class="status-msg" style="padding: 12px; font-size: 13px;">暫無即時班次資料</div>`;
+            html += `<div class="status-msg" style="padding: 8px; font-size: 11px;">暫無即時班次資料</div>`;
           }
         });
 
